@@ -1,0 +1,22 @@
+[project]
+name = "bevor-mcp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Blake Hatch", email = "blakewihatch@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastmcp>=2.12.4",
+]
+
+[project.scripts]
+bevor-mcp = "bevor_mcp.main:main"
+
+[tool.uv]
+package = true
+
+[build-system]
+requires = ["uv_build>=0.8.22,<0.9.0"]
+build-backend = "uv_build"
