@@ -2,20 +2,24 @@
 
 from fastmcp import FastMCP, Context
 import asyncio
+import os
 
 mcp = FastMCP("Bevor MCP")
 
 
-@mcp.resource
+@mcp.resource("resource://health_check")
 def health_check() -> dict:
     """Health check resource for the Bevor MCP server."""
+    project_path = os.getenv("PROJECT_PATH")
+
     return {
         "status": "healthy",
         "server": "Bevor MCP",
         "version": "0.1.0",
         "uptime": "running",
         "tools_available": ["add", "audit_log"],
-        "resources_available": ["health_check"]
+        "resources_available": ["health_check"],
+        "project_path": project_path
     }
 
 @mcp.tool
@@ -55,40 +59,6 @@ def audit_log(action: str, user: str = "system", details: str = "") -> dict:
     print(f"AUDIT: {audit_entry}")
     
     return audit_entry
-
-@mcp.tool
-def list_directory() -> dict:
-    """Run ls command and get current directory."""
-    import subprocess
-    
-    try:
-        # Run ls command and capture output
-        ls_result = subprocess.run(['ls'], capture_output=True, text=True)
-        
-        # Get current directory
-        pwd_result = subprocess.run(['pwd'], capture_output=True, text=True)
-        
-        # Split ls output into list of files/directories
-        files = ls_result.stdout.strip().split('\n')
-        
-        # Get current directory path
-        current_dir = pwd_result.stdout.strip()
-        
-        return {
-            "status": "success",
-            "current_directory": current_dir,
-            "files": files,
-            "error": None
-        }
-        
-    except Exception as e:
-        return {
-            "status": "error",
-            "current_directory": None,
-            "files": [],
-            "error": str(e)
-        }
-
 
 
 def main():

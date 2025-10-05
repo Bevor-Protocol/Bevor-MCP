@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "Bevor MCP": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "fastmcp",
+        "fastmcp",
+        "run",
+        "/Users/blakehatch/Projects/Bevor-MCP/src/bevor_mcp/server.py"
+      ],
+      "env": {},
+      "transport": "stdio",
+      "type": null,
+      "cwd": null,
+      "timeout": null,
+      "description": null,
+      "icon": null,
+      "authentication": null
+    }
+  }
+}
