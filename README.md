@@ -11,19 +11,16 @@
 ### Contributors
 
 <p align="center">
-  <a href="https://github.com/petersim1">
+  <a href="https://github.com/petersim1" style="display:inline-block; text-align:center; margin:0 12px;">
     <img src="https://github.com/petersim1.png?size=120" width="88" height="88" style="border-radius:50%" alt="petersim1" />
-    <br/>
-    <sub><b>petersim1</b></sub>
+    <div><sub><b>petersim1</b></sub></div>
   </a>
-  <a href="https://github.com/blakehatch">
+  <a href="https://github.com/blakehatch" style="display:inline-block; text-align:center; margin:0 12px;">
     <img src="https://github.com/blakehatch.png?size=120" width="88" height="88" style="border-radius:50%" alt="blakehatch" />
-    <br/>
-    <sub><b>blakehatch</b></sub>
+    <div><sub><b>blakehatch</b></sub></div>
   </a>
-  <a href="https://github.com/JonathanK556">
+  <a href="https://github.com/JonathanK556" style="display:inline-block; text-align:center; margin:0 12px;">
     <img src="https://github.com/JonathanK556.png?size=120" width="88" height="88" style="border-radius:50%" alt="JonathanK556" />
-    <br/>
-    <sub><b>JonathanK556</b></sub>
+    <div><sub><b>JonathanK556</b></sub></div>
   </a>
 </p>
