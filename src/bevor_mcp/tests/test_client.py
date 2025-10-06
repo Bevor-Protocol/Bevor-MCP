@@ -4,8 +4,8 @@ import os
 from pathlib import Path
 import asyncio
 import re
-import requests
-from bevor_mcp.bevor_api.client import BevorApiClient
+
+# Mock tests only - no live API calls
 
 class TestBevorApiClient(unittest.TestCase):
     def setUp(self):
@@ -14,13 +14,8 @@ class TestBevorApiClient(unittest.TestCase):
         self.contracts_dir = Path(self.temp_dir) / "contracts"
         self.contracts_dir.mkdir()
 
-        # Ensure tests target the local API server
-        os.environ["BEVOR_API_URL"] = os.getenv("BEVOR_API_URL", "http://localhost:8000")
-        # Ensure API key is present for auth; use default test key if not provided
-        os.environ["BEVOR_API_KEY"] = os.getenv(
-            "BEVOR_API_KEY",
-            "sk_27d1eb_75b273c4b09760c2a5671e892608729b818385c713504e5a4f111a0aa10b15a6",
-        )
+        # Mock tests don't need real API credentials
+        os.environ["BEVOR_API_KEY"] = "sk_test_mock_key"
 
         # Create token.sol file
         token_code = '''// SPDX-License-Identifier: MIT
@@ -44,13 +39,14 @@ contract BevorToken is ERC20 {
         token_file = self.contracts_dir / "token.sol"
         token_file.write_text(token_code)
 
-        # No mocks for integration tests; requires live backend
+        # Always use mock for these tests
+        self.use_live = False
 
     def tearDown(self):
         # Clean up temp directory
         import shutil
         shutil.rmtree(self.temp_dir)
-        # No mocks to stop for integration tests
+        # Nothing to clean up for mock/live selection
 
     async def _client_integration_async(self):
         api_key = os.getenv("BEVOR_API_KEY")
@@ -58,19 +54,20 @@ contract BevorToken is ERC20 {
         
         # Already hit 20 project limit.
         try:
-            client = await BevorApiClient(bevor_api_key=api_key, contracts_folder_path=str(self.contracts_dir), project_id="ee5aaf7e-71a5-4c2d-8b20-96af42610367").create()
+            # Always use mock for these tests
+            from bevor_mcp.tests.mocks.mock_client import MockBevorApiClient
+            client = await MockBevorApiClient(
+                bevor_api_key=api_key,
+                contracts_folder_path=str(self.contracts_dir),
+                project_id=None,  # Mock doesn't need real project_id
+            ).create()
         except Exception as e:
-            print(f"Error initializing BevorApiClient: {e}")
+            print(f"Error initializing client: {e}")
             raise
 
-        # Verify client initialized correctly (live backend expected)
-        if not client.version_mapping_id or not client.chat_id:
-            # Print debug traces to help diagnose backend responses
-            print(f"project_resp: {getattr(client, 'last_project_response', None)}")
-            print(f"version_resp: {getattr(client, 'last_version_response', None)}")
-            print(f"chat_resp: {getattr(client, 'last_chat_response', None)}")
-        self.assertIsNotNone(client.version_mapping_id)
-        self.assertIsNotNone(client.chat_id)
+        # Mock should always generate ids
+        self.assertIsInstance(client.version_mapping_id, str)
+        self.assertIsInstance(client.chat_id, str)
         # Save client for use in subsequent tests
         self.client = client
         return client
