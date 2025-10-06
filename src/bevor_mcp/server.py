@@ -21,21 +21,41 @@ try:
 except Exception:
     _contracts_folder = None
 
+import asyncio as _asyncio
 client = BevorApiClient(
     bevor_api_key=os.getenv("BEVOR_API_KEY"),
     project_id=os.getenv("PROJECT_ID"),
     contracts_folder_path=_contracts_folder,
-).create()
+)
+
+_init_lock = _asyncio.Lock()
+_initialized = False
+initialized_client = None
+
+async def _ensure_client_initialized_async() -> None:
+    global _initialized
+    global initialized_client
+    if _initialized:
+        return
+    async with _init_lock:
+        if _initialized:
+            return
+        # Create a separate initialized client instance
+        initialized_client = await client.create()
+        _initialized = True
 
 @mcp.resource("resource://health_check")
-def health_check() -> dict:
+async def health_check() -> dict:
     """Health check resource for the Bevor MCP server."""
     project_path = _resolved_project_path
 
+    await _ensure_client_initialized_async()
+    # Use the initialized client if available
+    c = initialized_client or client
     bevor_api_healthy = all([
-        client.project_id is not None,
-        client.version_mapping_id is not None,
-        client.chat_id is not None
+        c.project_id is not None,
+        c.version_mapping_id is not None,
+        c.chat_id is not None
     ])
 
     status = "healthy" if bevor_api_healthy else "bevor_api_unhealthy"
@@ -52,31 +72,34 @@ def health_check() -> dict:
         "bevor_api": {
             "healthy": bevor_api_healthy,
             "project_path": project_path,
-            "contracts_folder_path": client.contracts_folder_path,
-            "project_id": client.project_id,
-            "version_mapping_id": client.version_mapping_id,
-            "chat_id": client.chat_id
+            "contracts_folder_path": c.contracts_folder_path,
+            "project_id": c.project_id,
+            "version_mapping_id": c.version_mapping_id,
+            "chat_id": c.chat_id
         }
     }
 
 @mcp.tool
-async def process_items(items: list[str], ctx: Context) -> dict:
-    """Process a list of items with progress updates."""
-    total = len(items)
-    results = []
+async def chat(message: str, ctx: Context) -> dict:
+    """Send a chat message to the Bevor API and return the response."""
+    await _ensure_client_initialized_async()
     
-    for i, item in enumerate(items):
-        # Report progress as we process each item
-        await ctx.report_progress(progress=i, total=total)
-        
-        # Simulate processing time
-        await asyncio.sleep(0.1)
-        results.append(item.upper())
+    # Use the initialized client if available
+    c = initialized_client or client
     
-    # Report 100% completion
-    await ctx.report_progress(progress=total, total=total)
+    # Report starting chat
+    ctx.report_progress(25, "Starting chat...")
     
-    return {"processed": len(results), "results": results}
+    # Call chat_contract with the message
+    response = c.chat_contract(message)
+    
+    # Report chat in progress
+    ctx.report_progress(75, "Processing response...")
+    
+    # Report completion
+    ctx.report_progress(100, "Chat complete")
+    
+    return response
 
 
 def main():

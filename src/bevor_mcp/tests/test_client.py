@@ -85,7 +85,7 @@ contract BevorToken is ERC20 {
         self.assertIsNotNone(getattr(client, "chat_id", None))
 
         # Call chat_contract and assert response is a string
-        result = client.chat_contract(client.chat_id or "", "Summarize the uploaded contract in one sentence.")
+        result = client.chat_contract("Summarize the uploaded contract in one sentence.")
         self.assertIsInstance(result, dict)
         message = (
             result.get("response")

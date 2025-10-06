@@ -236,14 +236,14 @@ class BevorApiClient:
         return {"error": "No response from chats endpoint"}
 
     
-    def chat_contract(self, chat_id: str, message: str) -> Dict[str, Any]:
+    def chat_contract(self, message: str) -> Dict[str, Any]:
         """Send a chat message to a specific chat session and return the final response.
 
         This calls POST /chats/{chat_id} with a JSON body {"message": message}.
         The endpoint streams Server-Sent Events; we accumulate the content and
         return the final combined text once streaming completes.
         """
-        url = f"{self.base_url}/chats/{chat_id}"
+        url = f"{self.base_url}/chats/{self.chat_id}"
         # Use session headers which already include Authorization and JSON defaults
         headers = {
             "Authorization": self.session.headers.get("Authorization", ""),
