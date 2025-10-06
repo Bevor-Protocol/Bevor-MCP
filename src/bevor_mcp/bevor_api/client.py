@@ -236,18 +236,17 @@ class BevorApiClient:
         return {"error": "No response from chats endpoint"}
 
     
-    def chat_contract(self, message: str) -> Dict[str, Any]:
+    def chat_contract(self, message: str) -> str:
         """Send a chat message to a specific chat session and return the final response.
 
         This calls POST /chats/{chat_id} with a JSON body {"message": message}.
-        The endpoint streams Server-Sent Events; we accumulate the content and
-        return the final combined text once streaming completes.
+        The endpoint streams Server-Sent Events; we return only the final message.
         """
         url = f"{self.base_url}/chats/{self.chat_id}"
         # Use session headers which already include Authorization and JSON defaults
         headers = {
             "Authorization": self.session.headers.get("Authorization", ""),
-            "Content-Type": "application/json",
+            "Content-Type": "application/json", 
             "Accept": "application/json",
         }
 
@@ -256,22 +255,28 @@ class BevorApiClient:
         try:
             response = requests.post(url, headers=headers, json=payload, stream=True)
         except requests.RequestException as e:
-            return {"error": str(e)}
+            return f"Error: {str(e)}"
 
         if response.status_code != 200:
             # Try to surface JSON error if available
             try:
-                return {"error": response.json()}
+                error = response.json()
+                return f"Error: {str(error)}"
             except ValueError:
-                return {"error": f"HTTP {response.status_code}: {response.text}"}
+                return f"Error: HTTP {response.status_code}: {response.text}"
 
         # Handle streaming SSE/plain text
+        # Many backends stream cumulative snapshots. To avoid duplicated text,
+        # we treat certain chunk types (event_type=text, content fields) as
+        # full snapshots and overwrite the current buffer.
         full_response = ""
         try:
             for line in response.iter_lines():
                 if not line:
                     continue
                 line_text = line.decode("utf-8", errors="ignore")
+
+                # Case 1: SSE-style 'data: ' lines
                 if line_text.startswith("data: "):
                     data_content = line_text[6:]
                     if data_content.strip() == "[DONE]":
@@ -279,26 +284,74 @@ class BevorApiClient:
                     try:
                         chunk_data = json.loads(data_content)
                         if isinstance(chunk_data, dict):
+                            if chunk_data.get("event_type") == "text" and isinstance(chunk_data.get("content"), str):
+                                # Treat as full snapshot; overwrite to avoid duplication
+                                full_response = chunk_data.get("content", "")
+                                continue
+                            delta = chunk_data.get("delta")
+                            if isinstance(delta, str):
+                                full_response += delta
+                                continue
                             content = (
                                 chunk_data.get("content")
                                 or chunk_data.get("text")
                                 or chunk_data.get("message")
                                 or chunk_data.get("response")
                             )
-                            if content:
-                                full_response += str(content)
+                            if isinstance(content, str):
+                                # If new content is a superset of current, overwrite
+                                if content.startswith(full_response):
+                                    full_response = content
+                                # If current is a superset, keep current; else append conservatively
+                                elif full_response.startswith(content):
+                                    pass
+                                else:
+                                    full_response = (full_response + " " + content).strip()
+                        else:
+                            full_response += str(chunk_data)
                     except json.JSONDecodeError:
                         full_response += data_content
-                else:
+                    continue
+
+                # Case 2: Plain JSON line streaming (no 'data: ' prefix)
+                try:
+                    chunk_data = json.loads(line_text)
+                    if isinstance(chunk_data, dict):
+                        if chunk_data.get("event_type") == "text" and isinstance(chunk_data.get("content"), str):
+                            # Treat as full snapshot; overwrite to avoid duplication
+                            full_response = chunk_data.get("content", "")
+                            continue
+                        delta = chunk_data.get("delta")
+                        if isinstance(delta, str):
+                            full_response += delta
+                            continue
+                        content = (
+                            chunk_data.get("content")
+                            or chunk_data.get("text")
+                            or chunk_data.get("message")
+                            or chunk_data.get("response")
+                        )
+                        if isinstance(content, str):
+                            if content.startswith(full_response):
+                                full_response = content
+                            elif full_response.startswith(content):
+                                pass
+                            else:
+                                full_response = (full_response + " " + content).strip()
+                        else:
+                            # Avoid echoing raw dicts; ignore silently
+                            pass
+                    else:
+                        # Non-dict JSON (array/string/number) -> append stringified
+                        full_response += str(chunk_data)
+                except json.JSONDecodeError:
+                    # Case 3: Plain text line
                     full_response += line_text
         except Exception as e:
-            return {"error": f"Error processing stream: {str(e)}"}
+            return f"Error processing stream: {str(e)}"
 
         if full_response.strip():
-            return {"response": full_response.strip()}
+            return full_response.strip()
 
-        # Fallback: attempt to parse standard JSON response
-        try:
-            return response.json()
-        except ValueError:
-            return {"error": "No valid response received"}
+        # Fallback: avoid re-reading the consumed stream; return a safe default
+        return ""

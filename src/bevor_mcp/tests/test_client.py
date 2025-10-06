@@ -3,6 +3,7 @@ import tempfile
 import os
 from pathlib import Path
 import asyncio
+import re
 import requests
 from bevor_mcp.bevor_api.client import BevorApiClient
 
@@ -86,18 +87,18 @@ contract BevorToken is ERC20 {
 
         # Call chat_contract and assert response is a string
         result = client.chat_contract("Summarize the uploaded contract in one sentence.")
-        self.assertIsInstance(result, dict)
-        message = (
-            result.get("response")
-            or result.get("message")
-            or result.get("content")
-            or result.get("text")
-            or result.get("data")
-            or ""
-        )
-        self.assertIsInstance(message, str)
+        self.assertIsInstance(result, str)
+        self.assertGreater(len(result), 0)
+        # Verify response is not a JSON string
+        self.assertFalse(result.startswith('{"event_type":'))
+        # Enforce no obvious duplicated concatenation from streaming
+        # Heuristic: splitting by sentence-ending punctuation shouldn't produce adjacent identical prefixes
+        segments = [s.strip() for s in re.split(r'[.!?]+\s*', result) if s.strip()]
+        self.assertGreater(len(segments), 0)
+        if len(segments) >= 2:
+            self.assertNotEqual(segments[0], segments[1])
         # Print so it's visible in test output
-        print(f"chat_contract response: {message}")
+        print(f"chat_contract response: {result}")
 
 if __name__ == '__main__':
     unittest.main()
