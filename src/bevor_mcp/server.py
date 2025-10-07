@@ -5,12 +5,14 @@ import asyncio
 import os
 import sys
 from pathlib import Path
-from bevor_api.client import BevorApiClient
+from bevor_mcp.bevor_api.client import BevorApiClient
+from bevor_mcp.services.devtools.service import DevToolsService
 
-# Use fallback import explicitly for Cursor execution context
-from utils.solidity_etl import find_contracts_folder_in_directory
+# Use package import for solidity ETL utilities
+from bevor_mcp.utils.solidity_etl import find_contracts_folder_in_directory
 
 mcp = FastMCP("Bevor MCP")
+_devtools = DevToolsService()
 
 # Resolve project path safely (default to current working directory)
 _env_project_path = os.getenv("PROJECT_PATH")
@@ -122,6 +124,36 @@ async def functionality_chat(message: str, ctx: Context) -> str:
 async def explain_code(message: str, ctx: Context) -> str:
     """Send a code explanation request to the Bevor API and return the response."""
     return await _handle_chat_request(message, ctx, "explain")
+
+
+@mcp.tool(name="build_command", description="Build smart contracts using Foundry/Hardhat/Truffle. Auto-detects toolchain unless 'tool' is provided.")
+async def build_command(project_dir: str | None = None, tool: str | None = None) -> dict:
+    project_dir = project_dir or _resolved_project_path
+    res = _devtools.build(project_dir=project_dir, tool=tool)
+    return {
+        "ok": res.ok,
+        "code": res.code,
+        "stdout": res.stdout,
+        "stderr": res.stderr,
+        "command": list(res.command),
+        "project_dir": project_dir,
+        "tool": tool or "auto",
+    }
+
+
+@mcp.tool(name="test_command", description="Test smart contracts using Foundry/Hardhat/Truffle. Auto-detects toolchain unless 'tool' is provided.")
+async def test_command(project_dir: str | None = None, tool: str | None = None) -> dict:
+    project_dir = project_dir or _resolved_project_path
+    res = _devtools.test(project_dir=project_dir, tool=tool)
+    return {
+        "ok": res.ok,
+        "code": res.code,
+        "stdout": res.stdout,
+        "stderr": res.stderr,
+        "command": list(res.command),
+        "project_dir": project_dir,
+        "tool": tool or "auto",
+    }
 
 
 
