@@ -5,10 +5,15 @@ import asyncio
 import os
 import sys
 from pathlib import Path
+
+# Add the src directory to Python path to ensure imports work
+current_dir = Path(__file__).parent
+src_dir = current_dir.parent
+if str(src_dir) not in sys.path:
+    sys.path.insert(0, str(src_dir))
+
 from bevor_mcp.bevor_api.client import BevorApiClient
 from bevor_mcp.services.devtools.service import DevToolsService
-
-# Use package import for solidity ETL utilities
 from bevor_mcp.utils.solidity_etl import find_contracts_folder_in_directory
 
 mcp = FastMCP("Bevor MCP")

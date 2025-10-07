@@ -12,7 +12,7 @@ class HardhatAdapter:
         return (root / "node_modules" / ".bin" / "hardhat").exists()
 
     def build_command(self, project_dir: str) -> Sequence[str]:
-        return ["npx", "hardhat", "build"]
+        return ["npx", "hardhat", "compile"]
 
     def test_command(self, project_dir: str) -> Sequence[str]:
         return ["npx", "hardhat", "test"]
