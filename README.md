@@ -22,10 +22,10 @@ Bevor MCP provides lightweight access for AI smart contract security in your dev
 
 ## Features
 
--Dynamically find vulnerabilities in smart ccontracts
--Esplain smart contract structure and functionality
--Assistance with development best practices and gas optimization
--
+- 🛡️ Dynamically find vulnerabilities in smart contracts  
+- 📘 Explain smart contract structure and functionality  
+- ⚙️ Assistance with development best practices and gas optimization
+
 
 ## Contributors
 
