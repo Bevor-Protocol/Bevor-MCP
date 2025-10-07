@@ -2,13 +2,32 @@
 
   <img src="assets/BevorAI_Banner.webp" alt="Bevor MCP Banner" width="100%" />
 
-  <h2>Bevor-MCP</h2>
+  <h2>Bevor MCP</h2>
+
+<p align="center">
+  AI assisted smart contract audits.
+  <br />
+  <a href="https://www.bevor.io/"><strong>Website</strong></a> 
+  •
+  <a href="https://docs.bevor.io/"><strong>Docs</strong></a>
+</p>
 
 </div>
 
 ---
 
-### Contributors
+## About
+
+Bevor MCP provides lightweight access for AI smart contract security in your development and auditing workflows such as Cursor, Windsurf and Claude code.
+
+## Features
+
+-Dynamically find vulnerabilities in smart ccontracts
+-Esplain smart contract structure and functionality
+-Assistance with development best practices and gas optimization
+-
+
+## Contributors
 
 <table align="center">
   <tr>
