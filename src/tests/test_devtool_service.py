@@ -7,10 +7,10 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 from typing import Sequence
 
-from bevor_mcp.services.devtools.base import CommandResult, DevToolAdapter
-from bevor_mcp.services.devtools.service import DevToolsService
-from bevor_mcp.services.devtools.adapters import FoundryAdapter, HardhatAdapter, TruffleAdapter
-from bevor_mcp.services.devtools.runner import run_command
+from services.devtools.base import CommandResult, DevToolAdapter
+from services.devtools.service import DevToolsService
+from services.devtools.adapters import FoundryAdapter, HardhatAdapter, TruffleAdapter
+from services.devtools.runner import run_command
 
 
 class MockAdapter(DevToolAdapter):
@@ -128,7 +128,7 @@ class TestHardhatAdapter(unittest.TestCase):
         build_cmd = self.adapter.build_command(self.temp_dir)
         test_cmd = self.adapter.test_command(self.temp_dir)
         
-        self.assertEqual(list(build_cmd), ["npx", "hardhat", "build"])
+        self.assertEqual(list(build_cmd), ["npx", "hardhat", "compile"])
         self.assertEqual(list(test_cmd), ["npx", "hardhat", "test"])
 
 
@@ -251,7 +251,7 @@ class TestDevToolsService(unittest.TestCase):
         self.assertIn("Unknown tool 'unknown'", str(context.exception))
         self.assertIn("Supported:", str(context.exception))
     
-    @patch('bevor_mcp.services.devtools.service.run_command')
+    @patch('services.devtools.service.run_command')
     def test_build_with_auto_detection(self, mock_run_command):
         """Test build command with auto-detection."""
         # Setup foundry config
@@ -273,7 +273,7 @@ class TestDevToolsService(unittest.TestCase):
             env=None
         )
     
-    @patch('bevor_mcp.services.devtools.service.run_command')
+    @patch('services.devtools.service.run_command')
     def test_build_with_explicit_tool(self, mock_run_command):
         """Test build command with explicit tool selection."""
         # Mock successful command execution
@@ -284,14 +284,14 @@ class TestDevToolsService(unittest.TestCase):
         self.assertTrue(result.ok)
         self.assertEqual(result.code, 0)
         self.assertEqual(result.stdout, "Hardhat build successful")
-        self.assertEqual(list(result.command), ["npx", "hardhat", "build"])
+        self.assertEqual(list(result.command), ["npx", "hardhat", "compile"])
         mock_run_command.assert_called_once_with(
-            ["npx", "hardhat", "build"],
+            ["npx", "hardhat", "compile"],
             cwd=self.temp_dir,
             env=None
         )
     
-    @patch('bevor_mcp.services.devtools.service.run_command')
+    @patch('services.devtools.service.run_command')
     def test_build_with_custom_env(self, mock_run_command):
         """Test build command with custom environment variables."""
         # Setup foundry config
@@ -311,7 +311,7 @@ class TestDevToolsService(unittest.TestCase):
             env=custom_env
         )
     
-    @patch('bevor_mcp.services.devtools.service.run_command')
+    @patch('services.devtools.service.run_command')
     def test_build_with_failure(self, mock_run_command):
         """Test build command with failure."""
         # Setup foundry config
@@ -328,7 +328,7 @@ class TestDevToolsService(unittest.TestCase):
         self.assertEqual(result.stderr, "Compilation failed")
         self.assertEqual(list(result.command), ["forge", "build"])
     
-    @patch('bevor_mcp.services.devtools.service.run_command')
+    @patch('services.devtools.service.run_command')
     def test_test_with_auto_detection(self, mock_run_command):
         """Test test command with auto-detection."""
         # Setup hardhat config
@@ -350,7 +350,7 @@ class TestDevToolsService(unittest.TestCase):
             env=None
         )
     
-    @patch('bevor_mcp.services.devtools.service.run_command')
+    @patch('services.devtools.service.run_command')
     def test_test_with_explicit_tool(self, mock_run_command):
         """Test test command with explicit tool selection."""
         # Mock successful command execution
@@ -521,7 +521,7 @@ contract Test {
         
         # Test build command generation
         build_cmd = adapter.build_command(self.temp_dir)
-        self.assertEqual(list(build_cmd), ["npx", "hardhat", "build"])
+        self.assertEqual(list(build_cmd), ["npx", "hardhat", "compile"])
         
         # Test test command generation
         test_cmd = adapter.test_command(self.temp_dir)

@@ -13,10 +13,16 @@ dependencies = [
 ]
 
 [project.scripts]
-bevor-mcp = "bevor_mcp.server:main"
+bevor-mcp = "server:main"
 
 [tool.uv]
-package = true
+package = false
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [build-system]
 requires = ["uv_build>=0.8.22,<0.9.0"]

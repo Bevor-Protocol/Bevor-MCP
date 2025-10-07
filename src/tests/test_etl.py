@@ -3,7 +3,7 @@ import tempfile
 import os
 from pathlib import Path
 import shutil
-from bevor_mcp.utils.solidity_etl import find_contracts_folder_in_directory
+from utils.solidity_etl import find_contracts_folder_in_directory
 
 class TestFindContractsFolder(unittest.TestCase):
     def setUp(self):

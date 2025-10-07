@@ -55,7 +55,7 @@ contract BevorToken is ERC20 {
         # Already hit 20 project limit.
         try:
             # Always use mock for these tests
-            from bevor_mcp.tests.mocks.mock_client import MockBevorApiClient
+            from tests.mocks.mock_client import MockBevorApiClient
             client = await MockBevorApiClient(
                 bevor_api_key=api_key,
                 contracts_folder_path=str(self.contracts_dir),

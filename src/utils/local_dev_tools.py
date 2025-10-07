@@ -1,6 +1,6 @@
 from typing import Optional, Mapping
 
-from bevor_mcp.services.devtools import DevToolsService
+from services.devtools import DevToolsService
 
 
 _service = DevToolsService()

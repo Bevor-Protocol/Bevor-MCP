@@ -3,7 +3,7 @@ import tempfile
 import os
 from pathlib import Path
 import asyncio
-from bevor_mcp.bevor_api.client import BevorApiClient
+from bevor_api.client import BevorApiClient
 
 class TestBevorApiClientLive(unittest.TestCase):
     """Live integration tests - only run when BEVOR_LIVE_TESTS=true"""

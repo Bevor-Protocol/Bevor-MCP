@@ -12,9 +12,9 @@ src_dir = current_dir.parent
 if str(src_dir) not in sys.path:
     sys.path.insert(0, str(src_dir))
 
-from bevor_mcp.bevor_api.client import BevorApiClient
-from bevor_mcp.services.devtools.service import DevToolsService
-from bevor_mcp.utils.solidity_etl import find_contracts_folder_in_directory
+from bevor_api.client import BevorApiClient
+from services.devtools.service import DevToolsService
+from utils.solidity_etl import find_contracts_folder_in_directory
 
 mcp = FastMCP("Bevor MCP")
 _devtools = DevToolsService()
