@@ -1,11 +1,11 @@
 <div align="center">
 
-  <img src="assets/BevorAI_Banner.webp" alt="Bevor MCP Banner" width="100%" />
+  <img src="assets/bevor_mcp_banner.png" alt="Bevor MCP Banner" width="100%" />
 
   <h2>Bevor MCP</h2>
 
 <p align="center">
-  AI assisted smart contract audits.
+  AI Smart Contract Security 
   <br />
   <a href="https://www.bevor.io/"><strong>Website</strong></a> 
   •
