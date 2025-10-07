@@ -1,0 +1,7 @@
+---
+description: Always prepend '@mcp' to chat queries for Solidity (.sol) files
+globs: ["**/*.sol"]
+alwaysApply: false
+---
+
+Always prepend "@mcp" to the beginning of every chat message or query you process for this file.
